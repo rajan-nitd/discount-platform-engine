@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Demo runner using the example from the requirements doc.
+ * Demo runner using the exact example from the requirements doc.
  */
 public class Main {
 
     public static void main(String[] args) {
+        // --- Build the cart ---
         Cart cart = new Cart(
                 List.of(
                         new CartItem("PUMA T-shirt", "PUMA", "T-shirts", Money.of(999), 2),
@@ -20,6 +21,7 @@ public class Main {
                 new PaymentContext("CREDIT_CARD", "ICICI")
         );
 
+        // --- Define discount rules ---
         List<DiscountRule> rules = List.of(
                 DiscountRule.builder("BRAND_PUMA_40", DiscountType.BRAND, 40)
                         .description("Min 40% off on all PUMA items")
@@ -33,10 +35,7 @@ public class Main {
                         .build(),
 
                 DiscountRule.builder("VOUCHER_SUPER69", DiscountType.VOUCHER, 69)
-                        .description("SUPER69: 69% off with constrain" +
-                                "" +
-                                "" +
-                                "ts")
+                        .description("SUPER69: 69% off with constraints")
                         .voucherCode("SUPER69")
                         .excludedBrands(Set.of("Nike"))
                         .maxCap(Money.of(500))
@@ -51,19 +50,25 @@ public class Main {
                         .build()
         );
 
+        // --- Calculate ---
         DiscountEngine engine = new DiscountEngine();
         DiscountResult result = engine.calculateDiscounts(cart, rules);
 
+        // --- Print results ---
         System.out.println("=== Discount Calculation Result ===");
         System.out.println("Original Price : " + result.originalPrice());
         System.out.println("Total Discount : " + result.totalDiscount());
         System.out.println("Final Price    : " + result.finalPrice());
         System.out.println();
 
-        System.out.println("--- Discounts ---");
+        System.out.println("--- Applied/Skipped Discounts ---");
         for (AppliedDiscount ad : result.appliedDiscounts()) {
-            String status = ad.applied() ? "APPLIED" : "SKIPPED";
-            System.out.printf("  [%s] %s (%s) - %s%n", status, ad.ruleId(), ad.discountAmount(), ad.reason());
+            String status = ad.applied() ? "✓ APPLIED" : "✗ SKIPPED";
+            System.out.printf("  [%s] %s (%s) — %s%n", status, ad.ruleId(), ad.discountAmount(), ad.reason());
         }
+
+        System.out.println();
+        System.out.println("--- Reasoning ---");
+        System.out.println(result.reasoning());
     }
 }

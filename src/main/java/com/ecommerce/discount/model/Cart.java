@@ -5,18 +5,13 @@ import java.util.List;
 /**
  * Represents a shopping cart with items and optional payment context.
  */
-public class Cart {
-
-    private List<CartItem> items;
-    private PaymentContext paymentContext;
-
-    public Cart(List<CartItem> items, PaymentContext paymentContext) {
-        this.items = items;  // no defensive copy
-        this.paymentContext = paymentContext;
+public record Cart(
+        List<CartItem> items,
+        PaymentContext paymentContext
+) {
+    public Cart {
+        items = List.copyOf(items); // defensive copy, immutable
     }
-
-    public List<CartItem> getItems() { return items; }
-    public PaymentContext getPaymentContext() { return paymentContext; }
 
     public Money totalBeforeDiscounts() {
         Money total = Money.ZERO;
